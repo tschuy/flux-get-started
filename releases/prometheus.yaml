@@ -12,3 +12,12 @@ spec:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: prometheus-operator
     version: 8.3.3
+  values:
+    prometheus:
+      service:
+        type: NodePort
+        nodePort: 32005
+    alertmanager:
+      service:
+        type: NodePort
+        nodePort: 32006
