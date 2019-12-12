@@ -17,6 +17,11 @@ spec:
       enabled: true
       image: "vault:1.2.4"
 
+    ui:
+      enabled: true
+      serviceType: 'NodePort'
+      serviceNodePort: 31001
+
     server:
       # pass AWS credentials to vault for KMS unlock
       extraSecretEnvironmentVars:
