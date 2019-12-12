@@ -31,6 +31,17 @@ spec:
             secretKeyRef:
               name: my-aws-secret
               key: AWS_SECRET_ACCESS_KEY
+        # Consul runs the agent as a daemonset on a host port, so use the downward
+        # API to get the hostIP
+        - name: HOST_IP
+          valueFrom:
+            fieldRef:
+              fieldPath: status.hostIP
+
+      extraArgs:
+        # Use extraArgs to set the -consul.hostname configuration using an
+        # environment variable from the downward API.
+        "consul.hostname": "$(HOST_IP):8500"
 
       config:
         auth_enabled: false
@@ -64,7 +75,9 @@ spec:
                 store: consul
                 prefix: "loki-collectors/"
                 consul:
-                  host: "consul-consul-server.consul.svc.cluster.local:8500"
+                  # "host" is unset in this configuration file because it's set
+                  # using extraArgs due to the value coming from an environment
+                  # variable.
                   httpclienttimeout: "20s"
                   consistentreads: true
 
