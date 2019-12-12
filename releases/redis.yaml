@@ -5,7 +5,6 @@ metadata:
   name: redis
   namespace: demo
   annotations:
-    fluxcd.io/automated: "true"
     fluxcd.io/tag.chart-image: semver:~4.0
     fluxcd.io/locked: "true"
     fluxcd.io/locked_msg: "Halt updates for now"
@@ -18,7 +17,7 @@ spec:
     version: 10.2.1
   valueFileSecrets:
     # the redis-auth secret contains the password value
-    - name: redis-auth
+  - name: redis-auth
   values:
     usePassword: true
     cluster:
