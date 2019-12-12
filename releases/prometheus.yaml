@@ -21,3 +21,9 @@ spec:
       service:
         type: NodePort
         nodePort: 32006
+    prometheusOperator:
+      admissionWebhooks:
+        patch:
+          podAnnotations:
+            "consul.hashicorp.com/connect-inject": "true"
+
