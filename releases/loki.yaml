@@ -1,0 +1,125 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: loki
+  namespace: loki
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: loki
+  chart:
+    repository: https://grafana.github.io/loki/charts
+    name: loki-stack
+    version: 0.23.0
+  values:
+    loki:
+      enabled: true
+      service:
+        type: LoadBalancer
+
+      replicas: 3
+
+      env:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: my-aws-secret
+              key: AWS_ACCESS_KEY_ID
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: my-aws-secret
+              key: AWS_SECRET_ACCESS_KEY
+
+      config:
+        auth_enabled: false
+        server:
+          http_listen_port: 3100
+          http_server_idle_timeout: "30s"
+
+          graceful_shutdown_timeout: "30s"
+          # 64MB = 67108864 bytes
+          grpc_server_max_send_msg_size: 67108864
+
+        limits_config:
+          enforce_metric_name: false
+          reject_old_samples: true
+          reject_old_samples_max_age: "168h"
+
+        ingester:
+          chunk_idle_period: 15m
+          # 256KB
+          chunk_block_size: 262144
+
+          # max attempts to transfer in-memory data to another ingester replica
+          # before deciding to flush to storage.
+          # max_transfer_retries: 60
+
+          lifecycler:
+            ring:
+              replication_factor: 3
+              heartbeart_timeout: 1m
+              kvstore:
+                store: consul
+                prefix: "loki-collectors/"
+                consul:
+                  host: "consul-consul-server.consul.svc.cluster.local:8500"
+                  httpclienttimeout: "20s"
+                  consistentreads: true
+
+            # num_tokens: 512
+            join_after: "30s"
+
+        ingester_client:
+          grpc_client_config:
+            # 64MB = 67108864 bytes
+            max_recv_msg_size: 67108864
+
+        storage_config:
+          aws:
+            s3: s3://us-west-1/czibolski-rigetti-test
+            dynamodbconfig:
+              dynamodb: dynamodb://us-west-1
+
+        schema_config:
+          configs:
+            - from: 2019-12-01
+              store: aws
+              object_store: s3
+              schema: v9
+              index:
+                prefix: czibolski_loki_test_index_
+                period: 168h
+
+        chunk_store_config:
+          max_look_back_period: "30s"
+
+        table_manager:
+          retention_deletes_enabled: true
+          retention_period: 336h
+
+    promtail:
+      enabled: true
+
+    fluent-bit:
+      enabled: false
+
+    grafana:
+      enabled: true
+      adminPassword: admin
+      service:
+        type: LoadBalancer
+        port: 3000
+      sidecar:
+        datasources:
+          enabled: true
+
+    # prometheus:
+    #   enabled: true
+    #   pushgateway:
+    #     enabled: false
+    #   server:
+    #     service:
+    #       type: LoadBalancer
+    #       servicePort: 9090
