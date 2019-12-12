@@ -114,25 +114,3 @@ spec:
 
     promtail:
       enabled: true
-
-    fluent-bit:
-      enabled: false
-
-    grafana:
-      enabled: true
-      adminPassword: admin
-      service:
-        type: LoadBalancer
-        port: 3000
-      sidecar:
-        datasources:
-          enabled: true
-
-    # prometheus:
-    #   enabled: true
-    #   pushgateway:
-    #     enabled: false
-    #   server:
-    #     service:
-    #       type: LoadBalancer
-    #       servicePort: 9090
