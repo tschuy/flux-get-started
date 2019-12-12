@@ -21,7 +21,7 @@ spec:
     ui:
       service:
         type: 'NodePort'
-        additionalSpec:
+        additionalSpec: |
           nodePort: 31002
 
     # Enable Connect for secure communication between nodes
