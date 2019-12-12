@@ -2,12 +2,12 @@
 apiVersion: flux.weave.works/v1beta1
 kind: HelmRelease
 metadata:
-  name: prometheus-operator
+  name: prometheus-k8s
   namespace: prometheus
   annotations:
     fluxcd.io/automated: "false"
 spec:
-  releaseName: prometheus-operator
+  releaseName: prometheus-k8s
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: prometheus-operator
