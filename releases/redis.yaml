@@ -21,18 +21,5 @@ spec:
     - name: redis-auth
   values:
     usePassword: true
-    image:
-      repository: bitnami/redis
-      tag: 4.0.12
-    service:
-      type: ClusterIP
-      port: 6379
     cluster:
       enabled: false
-    master:
-      securityContext:
-        enabled: false
-        fsGroup: 0
-        runAsUser: 0
-      persistence:
-        enabled: false
