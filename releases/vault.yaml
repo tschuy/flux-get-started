@@ -1,0 +1,68 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: vault
+  namespace: vault
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: vault
+  chart:
+    git: git@github.com:hashicorp/vault-helm.git
+    ref: v0.2.1
+    path: .
+  values:
+    global:
+      enabled: true
+      image: "vault:1.2.4"
+
+    server:
+      # pass AWS credentials to vault for KMS unlock
+      extraSecretEnvironmentVars:
+      - envName: AWS_ACCESS_KEY_ID
+        secretName: my-aws-secret
+        secretKey: AWS_ACCESS_KEY_ID
+      - envName: AWS_SECRET_ACCESS_KEY
+        secretName: my-aws-secret
+        secretKey: AWS_SECRET_ACCESS_KEY
+
+      # extraVolumes:
+      # - type: secret
+      #   name: vault-server-tls
+
+    # # ensure pods run on different nodes
+    # affinity: |
+    #   podAntiAffinity:
+    #     requiredDuringSchedulingIgnoredDuringExecution:
+    #       - labelSelector:
+    #           matchLabels:
+    #             app: {{ template "vault.name" . }}
+    #             release: "{{ .Release.Name }}"
+    #             component: server
+    #         topologyKey: kubernetes.io/hostname
+
+      ha:
+        enabled: true
+        replicas: 2
+        config: |
+          ui = true
+
+          listener "tcp" {
+            tls_disable = 1
+            address = "[::]:8200"
+            cluster_address = "[::]:8201"
+            # tls_cert_file = "/vault/userconfig/vault-server-tls/vault.crt"
+            # tls_key_file  = "/vault/userconfig/vault-server-tls/vault.key"
+            # tls_client_ca_file = "/vault/userconfig/vault-server-tls/vault.ca"
+          }
+
+          # seal "awskms" {
+          #   region     = "KMS_REGION_HERE"
+          #   kms_key_id = "KMS_KEY_ID_HERE"
+          # }
+
+          storage "consul" {
+            path = "vault"
+            address = "HOST_IP:8500"
+          }
