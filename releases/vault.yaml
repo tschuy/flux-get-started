@@ -44,7 +44,7 @@ spec:
 
       ha:
         enabled: true
-        replicas: 2
+        replicas: 1
         config: |
           ui = true
 
