@@ -1,0 +1,33 @@
+---
+apiVersion: flux.weave.works/v1beta1
+kind: HelmRelease
+metadata:
+  name: grafana
+  namespace: grafana
+  annotations:
+    fluxcd.io/automated: "false"
+spec:
+  releaseName: grafana
+  chart:
+    repository: https://kubernetes-charts.storage.googleapis.com/
+    name: grafana
+    version: 4.1.3
+  values:
+    admin:
+      existingSecret: grafana-admin-credentials
+
+    service:
+      type: NodePort
+      port: 3000
+      nodePort: 32003
+
+    sidecar:
+      datasources:
+        enabled: true
+        additionalDataSources:
+          - name: Loki
+            type: loki
+            access: proxy
+            url: http://loki:3100
+            jsonData:
+              maxLines: 2000
