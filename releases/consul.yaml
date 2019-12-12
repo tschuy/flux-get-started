@@ -16,6 +16,8 @@ spec:
     # Choose an optional name for the datacenter
     global:
       datacenter: minidc
+      dns:
+        enabled: true
 
     # Enable the Consul Web UI via a NodePort
     ui:
@@ -24,9 +26,11 @@ spec:
         additionalSpec: |
           nodePort: 31002
 
-    # Enable Connect for secure communication between nodes
+    # Configure security for Consul Connect pod injection
     connectInject:
       enabled: true
+      default: true
+      aclBindingRuleSelector: “serviceaccount.name!=default”
 
     client:
       enabled: true
@@ -40,6 +44,18 @@ spec:
         enabled: true
         maxUnavailable: 0
 
+    # Prevent Consul servers from co-location on Kubernetes nodes.
+    affinity: |
+      podAntiAffinity:
+       requiredDuringSchedulingIgnoredDuringExecution:
+         - labelSelector:
+             matchLabels:
+               app: {{ template "consul.name" . }}
+               release: "{{ .Release.Name }}"
+               component: server
+         topologyKey: kubernetes.io/hostname
+
     # The catalog sync feature allows Consul to discover services deployed in Kubernetes, without an operator creating Consul registration files.
     syncCatalog:
       enabled: true
+
