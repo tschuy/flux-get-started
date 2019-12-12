@@ -16,7 +16,9 @@ spec:
     loki:
       enabled: true
       service:
-        type: LoadBalancer
+        type: NodePort
+        port: 3100
+        nodePort: 32004
 
       replicas: 3
 
