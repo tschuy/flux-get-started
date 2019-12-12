@@ -8,6 +8,7 @@ metadata:
     fluxcd.io/automated: "false"
 spec:
   releaseName: prometheus-operator
+  forceUpgrade: true
   chart:
     repository: https://kubernetes-charts.storage.googleapis.com/
     name: prometheus-operator
