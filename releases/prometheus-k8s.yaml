@@ -27,3 +27,19 @@ spec:
           podAnnotations:
             "consul.hashicorp.com/connect-inject": "false"
 
+    grafana:
+      admin:
+        existingSecret: grafana-admin-credentials
+
+      service:
+        type: NodePort
+        port: 3000
+        nodePort: 32007
+
+      additionalDataSources:
+        - name: Loki
+          type: loki
+          access: proxy
+          url: http://loki.loki:3100
+          jsonData:
+            maxLines: 2000
